@@ -1,30 +1,35 @@
-﻿using System.Windows.Controls;
-using System.Windows.Ink;
+﻿using System;
+using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using System.Windows.Shapes;
+
 namespace BallisticApp
 {
     internal class TargetCanvasManager
     {
         private readonly Canvas canvas;
         private readonly int totalRings = 10;
-        private double centerX;
-        private double centerY;
         private AppSettings settings;
         private Shot shot;
         private BallisticCalculator calculator;
-        //public double Center => center;
+
+        private double targetCenterX;
+        private double targetCenterY;
+        private double padding = 20;
+
         public TargetCanvasManager(Canvas canvas, AppSettings settings, Shot shot, BallisticCalculator calculator)
         {
             this.canvas = canvas;
             this.settings = settings;
-            this.centerX = canvas.ActualWidth / 2;
-            this.centerY = canvas.ActualHeight / 2;
             this.shot = shot;
             this.calculator = calculator;
+
+            targetCenterX = canvas.ActualWidth / 2;
+            targetCenterY = canvas.ActualHeight / 2;
+
             DrawResult(settings.View.TargetType, this.shot, this.calculator);
         }
+
         public void DrawResult(ViewSettings.TargetKind targetType, Shot shot, BallisticCalculator calculator)
         {
             switch (targetType)
@@ -37,106 +42,98 @@ namespace BallisticApp
                     break;
             }
         }
+
         private void DrawCircularResult(Shot shot)
         {
+            canvas.Children.Clear();
+
+            // Convert displacement to pixels (invert vertical!)
+            double shotX = MetersToPixels(shot.horizontalDisplacement, settings.Ballistics.TargetRadius);
+            double shotY = MetersToPixels(-shot.verticalDisplacement, settings.Ballistics.TargetRadius); // <-- invert
+
+            // Adjust canvas and target center dynamically
+            AdjustCanvasAndCenter(ref shotX, ref shotY);
+
             DrawCircle();
-            double maxDropMeters = shot.verticalDrop;
-            double canvasHeightNeeded = center + MetersToPixels(maxDropMeters, settings.Ballistics.TargetRadius) + 20;
-            if (canvasHeightNeeded > canvas.Height) canvas.Height = canvasHeightNeeded;
-            // Draw MOA ticks along vertical axis
-            double tickIntervalMeters = calculator.ComputeMOADistance();
-            for (double i = 0; i <= maxDropMeters; i += tickIntervalMeters)
-            {
-                double yPos = center + MetersToPixels(i, settings.Ballistics.TargetRadius);
-                var tick = new Line
-                {
-                    X1 = center - 20,
-                    Y1 = yPos,
-                    X2 = center + 20,
-                    Y2 = yPos,
-                    Stroke = Brushes.Orange,
-                    StrokeThickness = 1
-                };
-                canvas.Children.Add(tick);
-            }
-            // Render the shot
-            double shotY = center + MetersToPixels(shot.verticalDrop, settings.Ballistics.TargetRadius);
-            var hit = new Ellipse
-            {
-                Width = 6,
-                Height = 6,
-                Fill = Brushes.Red
-            }
-            ;
-            Canvas.SetLeft(hit, center - hit.Width / 2);
-            Canvas.SetTop(hit, shotY - hit.Height / 2);
-            canvas.Children.Add(hit);
-            //AddShot(shot,settings.Ballistics.TargetRadius ); 
-            //AddLine(settings.Ballistics.TargetRadius);
+            AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
+
+            AddShot(targetCenterX + shotX, targetCenterY + shotY);
         }
+
         private void DrawAxesResult(Shot shot, BallisticCalculator calculator)
         {
             canvas.Children.Clear();
-            center = canvas.ActualWidth / 2;
-            // Determine maximum drop to render full MOA ruler
-            double maxDropMeters = shot.verticalDrop; double canvasHeightNeeded = center + MetersToPixels(maxDropMeters, settings.Ballistics.TargetRadius) + 20; if (canvasHeightNeeded > canvas.Height) canvas.Height = canvasHeightNeeded;
-            // Draw vertical and horizontal axes
+
+            double shotX = MetersToPixels(shot.horizontalDisplacement, settings.Ballistics.TargetRadius);
+            double shotY = MetersToPixels(-shot.verticalDisplacement, settings.Ballistics.TargetRadius); // <-- invert
+
+            AdjustCanvasAndCenter(ref shotX, ref shotY);
+
+            // Draw axes
             var verticalLine = new Line
             {
-                X1 = center,
+                X1 = targetCenterX,
                 Y1 = 0,
-                X2 = center,
+                X2 = targetCenterX,
                 Y2 = canvas.Height,
                 Stroke = Brushes.Black,
                 StrokeThickness = 2
-            }
-            ;
+            };
             var horizontalLine = new Line
             {
                 X1 = 0,
-                Y1 = center,
+                Y1 = targetCenterY,
                 X2 = canvas.ActualWidth,
-                Y2 = center,
+                Y2 = targetCenterY,
                 Stroke = Brushes.Black,
                 StrokeThickness = 2
             };
             canvas.Children.Add(verticalLine);
             canvas.Children.Add(horizontalLine);
-            // Draw MOA ticks along vertical axis
-            double tickIntervalMeters = calculator.ComputeMOADistance();
-            for (double i = 0; i <= maxDropMeters; i += tickIntervalMeters)
-            {
-                double yPos = center + MetersToPixels(i, settings.Ballistics.TargetRadius);
-                var tick = new Line
-                {
-                    X1 = center - 20,
-                    Y1 = yPos,
-                    X2 = center + 20,
-                    Y2 = yPos,
-                    Stroke = Brushes.Orange,
-                    StrokeThickness = 1
-                };
-                canvas.Children.Add(tick);
-            }
-            // Render the shot
-            double shotY = center + MetersToPixels(shot.verticalDrop, settings.Ballistics.TargetRadius);
-            var hit = new Ellipse
-            {
-                Width = 6,
-                Height = 6,
-                Fill = Brushes.Red
-            }
-            ;
-            Canvas.SetLeft(hit, center - hit.Width / 2);
-            Canvas.SetTop(hit, shotY - hit.Height / 2);
-            canvas.Children.Add(hit);
+
+            AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
+
+            AddShot(targetCenterX + shotX, targetCenterY + shotY);
         }
+
+        private void AdjustCanvasAndCenter(ref double shotX, ref double shotY)
+        {
+            double shotPixelX = targetCenterX + shotX;
+            double shotPixelY = targetCenterY + shotY;
+
+            double deltaLeft = padding - shotPixelX;
+            double deltaRight = shotPixelX - (canvas.Width - padding);
+            double deltaTop = padding - shotPixelY;
+            double deltaBottom = shotPixelY - (canvas.Height - padding);
+
+            // Horizontal
+            if (deltaLeft > 0)
+            {
+                canvas.Width += deltaLeft;
+                targetCenterX += deltaLeft;
+            }
+            if (deltaRight > 0)
+            {
+                canvas.Width += deltaRight;
+            }
+
+            // Vertical
+            if (deltaTop > 0)
+            {
+                canvas.Height += deltaTop;
+                targetCenterY += deltaTop;
+            }
+            if (deltaBottom > 0)
+            {
+                canvas.Height += deltaBottom;
+            }
+        }
+
         private void DrawCircle()
         {
-            canvas.Children.Clear();
-            center = canvas.ActualWidth / 2;
-            double radiusIncrement = center / totalRings;
-            for (int i = totalRings; i > = 1; i--)
+            double radiusIncrement = Math.Min(targetCenterX, targetCenterY) / totalRings;
+
+            for (int i = totalRings; i >= 1; i--)
             {
                 double diameter = radiusIncrement * i * 2;
                 var ring = new Ellipse
@@ -146,21 +143,55 @@ namespace BallisticApp
                     Stroke = Brushes.Black,
                     StrokeThickness = 2
                 };
-                Canvas.SetLeft(ring, center - diameter / 2);
-                Canvas.SetTop(ring, center - diameter / 2);
+                Canvas.SetLeft(ring, targetCenterX - diameter / 2);
+                Canvas.SetTop(ring, targetCenterY - diameter / 2);
                 canvas.Children.Add(ring);
             }
+
             for (int i = 1; i < totalRings; i++)
             {
                 double d = radiusIncrement * (i + 0.5);
                 int num = totalRings - i;
-                AddNumber(num.ToString(), center - d, center);
-                AddNumber(num.ToString(), center + d, center);
-                AddNumber(num.ToString(), center, center - d);
-                AddNumber(num.ToString(), center, center + d);
+                AddNumber(num.ToString(), targetCenterX - d, targetCenterY);
+                AddNumber(num.ToString(), targetCenterX + d, targetCenterY);
+                AddNumber(num.ToString(), targetCenterX, targetCenterY - d);
+                AddNumber(num.ToString(), targetCenterX, targetCenterY + d);
             }
-            AddNumber("10", center, center);
+            AddNumber("10", targetCenterX, targetCenterY);
         }
+
+        private void AddMOATicks(double maxDistancePixels)
+        {
+            double tickIntervalMeters = calculator.ComputeMOADistance();
+            for (double i = 0; i <= PixelsToMeters(maxDistancePixels, settings.Ballistics.TargetRadius); i += tickIntervalMeters)
+            {
+                double yPos = targetCenterY + MetersToPixels(-i, settings.Ballistics.TargetRadius); // invert
+                var tick = new Line
+                {
+                    X1 = targetCenterX - 20,
+                    Y1 = yPos,
+                    X2 = targetCenterX + 20,
+                    Y2 = yPos,
+                    Stroke = Brushes.Orange,
+                    StrokeThickness = 1
+                };
+                canvas.Children.Add(tick);
+            }
+        }
+
+        private void AddShot(double x, double y)
+        {
+            var hit = new Ellipse
+            {
+                Width = 6,
+                Height = 6,
+                Fill = Brushes.Red
+            };
+            Canvas.SetLeft(hit, x - hit.Width / 2);
+            Canvas.SetTop(hit, y - hit.Height / 2);
+            canvas.Children.Add(hit);
+        }
+
         private void AddNumber(string text, double x, double y, double fontSize = 14)
         {
             var tb = new TextBlock
@@ -169,61 +200,17 @@ namespace BallisticApp
                 FontSize = fontSize,
                 FontWeight = System.Windows.FontWeights.Bold
             };
-            tb.Measure(
-              new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity)
-            );
+            tb.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
             var size = tb.DesiredSize;
             Canvas.SetLeft(tb, x - size.Width / 2);
             Canvas.SetTop(tb, y - size.Height / 2);
             canvas.Children.Add(tb);
         }
-        public double MetersToPixels(double meters, double targetRadiusCm) => meters * (
-          canvas.ActualHeight / (targetRadiusCm * 2 / 100)
-        );
-        public double PixelsToMeters(double pixels, double targetRadiusCm) => pixels * (
-          (targetRadiusCm * 2 / 100) / canvas.ActualHeight
-        );
-        public void AddShot(Shot shot, double targetRadiusCm)
-        {
-            double y = center + MetersToPixels(shot.verticalDrop, targetRadiusCm);
-            if (y > canvas.Height) canvas.Height = y + 20;
-            var hit = new Ellipse
-            {
-                Width = 6,
-                Height = 6,
-                Fill = Brushes.Red
-            };
-            Canvas.SetLeft(hit, center - hit.Width / 2);
-            Canvas.SetTop(hit, y - hit.Height / 2);
-            canvas.Children.Add(hit);
-        }
-        public void AddLine(double targetRadiusCm)
-        {
-            double length = canvas.Height - 20;
-            double lengthInMeters = PixelsToMeters(length, targetRadiusCm);
-            var line = new Line
-            {
-                X1 = center,
-                Y1 = center,
-                X2 = center,
-                Y2 = length,
-                Stroke = Brushes.Blue,
-                StrokeThickness = 2
-            };
-            canvas.Children.Add(line);
-            for (double i = 0; i < lengthInMeters; i = i + 0.1)
-            {
-                var tickline = new Line
-                {
-                    X1 = center - 20,
-                    Y1 = center + +MetersToPixels(i, targetRadiusCm),
-                    X2 = center + 20,
-                    Y2 = center + +MetersToPixels(i, targetRadiusCm),
-                    Stroke = Brushes.Orange,
-                    StrokeThickness = 2
-                };
-                canvas.Children.Add(tickline);
-            }
-        }
+
+        public double MetersToPixels(double meters, double targetRadiusCm) =>
+            meters * (canvas.ActualHeight / (targetRadiusCm * 2 / 100));
+
+        public double PixelsToMeters(double pixels, double targetRadiusCm) =>
+            pixels * ((targetRadiusCm * 2 / 100) / canvas.ActualHeight);
     }
 }

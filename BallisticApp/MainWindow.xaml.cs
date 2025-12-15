@@ -29,7 +29,7 @@ namespace BallisticApp
             }
 
             calculator = new BallisticCalculator(settings.Ballistics);
-            //shot = new Shot(calculator);
+
             shot = new Shot(settings.Ballistics);
 
             hud = new HUDManager(HudStackPanel, settings.Ballistics);
