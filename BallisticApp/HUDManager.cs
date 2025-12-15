@@ -1,0 +1,40 @@
+﻿using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using BallisticApp;
+
+namespace BallisticApp
+{
+    internal class HUDManager
+    {
+        private readonly Panel container;
+        private readonly BallisticSettings settings;
+
+        public HUDManager(Panel container, BallisticSettings settings)
+        {
+            this.container = container;
+            this.settings = settings;
+        }
+
+
+
+        public void Render()
+        {
+            container.Children.Clear();
+            PropertyInfo[] props = settings.GetType().GetProperties();
+
+            foreach (var prop in typeof(BallisticSettings).GetProperties())
+            {
+                string key = prop.Name; // e.g., "Distance"
+                string label = BallisticSettingsLabels.Labels[key]; // "Distance (m)"
+                object value = prop.GetValue(settings); // the actual value, e.g., 300
+
+                container.Children.Add(new TextBlock
+                {
+                    Text = $"{label}: {value}"
+                });
+            }
+        }
+    }
+
+}
