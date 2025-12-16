@@ -5,7 +5,7 @@
         public static void Apply(SettingsWindow w)
         {
             // Ammunition+Firearm tab
-            DefaultTextBehavior.SetDefaultText(w.BallisticCoefficientTextBox, "0.48");
+            DefaultTextBehavior.SetDefaultText(w.BallisticCoefficientTextBox, "0.415");
             DefaultTextBehavior.SetDefaultText(w.BulletWeightTextBox, "150");
             DefaultTextBehavior.SetDefaultText(w.BulletDiameterTextBox, "7.82");
             DefaultTextBehavior.SetDefaultText(w.MuzzleVelocityTextBox, "900");
