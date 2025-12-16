@@ -8,7 +8,7 @@ namespace BallisticApp
 {
     public class AdvancedBallisticsCalculator
     {
-        public static double CalculateImpact(BallisticSettings settings)
+        public static (double y, double x) CalculateImpact(BallisticSettings settings)
         {
             
             double temp = settings.Temperature + 273.15; // Convert to Kelvin
@@ -20,17 +20,16 @@ namespace BallisticApp
             List<DragTablePoint> table = DragTables.Tables[tableChoice];
             double bulletMass = ConvertGrainsToKg(settings.BulletWeight);
             double zeroingAngle = FindZeroingAngle(settings, airSpeed, table, rho, area, bulletMass);
-            double impactY = SimulateTrajectory(
+            (double impactY, double impactX) = SimulateTrajectory(
+                settings,
                 zeroingAngle,
-                settings.Distance,
-                settings.BulletVelocity,
                 rho,
                 airSpeed,
                 area,
                 bulletMass,
                 table
             );
-            return impactY;
+            return (impactY, impactX);
         }
 
         public static double FindZeroingAngle(BallisticSettings settings, double airSpeed, List<DragTablePoint> table,
@@ -40,6 +39,7 @@ namespace BallisticApp
             double angleLow = 0; // 0 degrees in radians
             double angleHigh = 10 * (Math.PI / 180.0); // 10 degrees in radians
             double angleTolerance = 0.00001;
+            double BC = settings.BallisticCoefficient;
             while ((angleHigh - angleLow) > angleTolerance)
             {
                 double midAngle = (angleLow + angleHigh) / 2.0;
@@ -54,7 +54,7 @@ namespace BallisticApp
 
                 while (x < settings.ZeroDistance)
                 {
-                    double dragForce = 0.5 * rho * v * v * area * cd / bulletMass;
+                    double dragForce = 0.5 * rho * v * v * area * cd / bulletMass;                    
                     double ax = -dragForce * (vx / v);
                     double ay = -9.81 - dragForce * (vy / v);
                     vx = vx + ax * dt;
@@ -75,34 +75,51 @@ namespace BallisticApp
         }
 
 
-        public static double  SimulateTrajectory(
-        double angle, double distance, double v0, double rho,
+        public static (double y, double z)  SimulateTrajectory(BallisticSettings settings,
+        double angle, double rho,
         double airSpeed, double area, double bulletMass,
         List<DragTablePoint> table)
             {
                 double dt = 0.0001;
                 double x = 0;
                 double y = 0;
-                double vx = v0 * Math.Cos(angle);
-                double vy = v0 * Math.Sin(angle);
-                double v = v0;
+                double z = 0;
+                double vx = settings.BulletVelocity * Math.Cos(angle);
+                double vy = settings.BulletVelocity * Math.Sin(angle);
+                double vz = 0;
+                double v = settings.BulletVelocity;
                 double mach = v / airSpeed;
-                double cd = GetDragCoefficient(table, mach);
+                double cd = 0;
+                double windSpeed = settings.WindSpeed;
+                double windDirection = settings.WindDirection * (Math.PI / 180.0); // Convert to radians
 
-                while (x < distance)
+                double v_wind_x = -windSpeed * Math.Cos(windDirection);
+                double v_wind_z = windSpeed * Math.Sin(windDirection);
+
+                double BC = settings.BallisticCoefficient;
+
+                while (x < settings.Distance)
                 {
-                    double dragForce = 0.5 * rho * v * v * area * cd / bulletMass;
-                    double ax = -dragForce * (vx / v);
-                    double ay = -9.81 - dragForce * (vy / v);
+                    double v_rel_x = vx - v_wind_x;  // bullet relative to air
+                    double v_rel_y = vy;             // vertical wind usually zero
+                    double v_rel_z = vz - v_wind_z;  // lateral component
+
+                    double v_rel = Math.Sqrt(v_rel_x * v_rel_x + v_rel_y * v_rel_y + v_rel_z * v_rel_z);
+                    mach = v_rel / airSpeed;
+                    cd = GetDragCoefficient(table, mach);
+
+                    double dragForce = 0.5 * rho * v_rel * v_rel * area * cd / bulletMass;
+                    double ax = -dragForce * (v_rel_x / v_rel);
+                    double ay = -9.81 - dragForce * (v_rel_y / v_rel);
+                    double az = -dragForce * (v_rel_z / v_rel);
                     vx += ax * dt;
                     vy += ay * dt;
+                    vz += az * dt;
                     x += vx * dt;
                     y += vy * dt;
-                    v = Math.Sqrt(vx * vx + vy * vy);
-                    mach = v / airSpeed;
-                    cd = GetDragCoefficient(table, mach);
+                    z += vz * dt;  
                 }
-                return (y);
+                return (y,z);
         }
 
         public static (double rho, double airSpeed) CalculateRHOandAirspeed(
