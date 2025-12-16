@@ -17,8 +17,12 @@ namespace BallisticApp
         public SettingsWindow()
         {
             InitializeComponent();
+            DefaultFieldInitializer.Apply(this);
             DrawPreviews();
         }
+
+        private static double Parse(TextBox tb)
+        => double.Parse(tb.Text, CultureInfo.InvariantCulture);
 
         private void DrawPreviews()
         {
@@ -79,24 +83,32 @@ namespace BallisticApp
             {
                 Ballistics = new BallisticSettings
                 {
-                    Distance = double.Parse(DistanceTextBox.Text, CultureInfo.InvariantCulture),
-                    ScopeHeight = double.Parse(ScopeHeightTextBox.Text, CultureInfo.InvariantCulture),
-                    BallisticCoefficient = double.Parse(BallisticCoeffTextBox.Text, CultureInfo.InvariantCulture),
+                    BallisticCoefficient = Parse(BallisticCoefficientTextBox),
+                    BulletWeight = Parse(BulletWeightTextBox),
+                    BulletDiameter = Parse(BulletDiameterTextBox),
+                    BulletVelocity = Parse(MuzzleVelocityTextBox),
+                    BarrelTwist = Parse(BarrelTwistTextBox),
+                    SightHeight = Parse(SightHeightTextBox),
+                    ZeroDistance = Parse(ZeroDistanceTextBox),
+                    WindSpeed = Parse(WindSpeedTextBox),
+                    WindDirection = Parse(WindDirectionTextBox),
+                    Altitude = Parse(AltitudeTextBox),
+                    Pressure = Parse(PressureTextBox),
+                    Temperature = Parse(TemperatureTextBox),
+                    Humidity = Parse(HumidityTextBox),
+                    ShootingAngle = Parse(ShootingAngleTextBox),
+                    Distance = Parse(DistanceTextBox),
+                    TargetRadius = Parse(TargetRadiusTextBox),
                     DragModel = None.IsChecked == true ? BallisticSettings.DragModelEnum.None :
                     G1.IsChecked == true ? BallisticSettings.DragModelEnum.G1 :
-                    BallisticSettings.DragModelEnum.G7,
-                    TargetRadius = double.Parse(TargetRadiusTextBox.Text, CultureInfo.InvariantCulture),
-                    BulletVelocity = double.Parse(VelocityTextBox.Text, CultureInfo.InvariantCulture),
-                    ZeroDistance = double.Parse(ZeroDistanceTextBox.Text, CultureInfo.InvariantCulture),
-                    WindDirection = double.Parse(WindDirectionTextBox.Text, CultureInfo.InvariantCulture),
-                    WindSpeed = double.Parse(WindSpeedTextBox.Text, CultureInfo.InvariantCulture)
+                    BallisticSettings.DragModelEnum.G7
                 };
 
                 View = new ViewSettings
                 {
                     TargetType = CircularOption.IsChecked == true
-                    ? ViewSettings.TargetKind.Circular
-                    : ViewSettings.TargetKind.Axes
+                                 ? ViewSettings.TargetKind.Circular
+                                 : ViewSettings.TargetKind.Axes
                 };
 
                 DialogResult = true;

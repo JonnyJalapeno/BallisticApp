@@ -16,9 +16,8 @@ namespace BallisticApp
         }*/
         public Shot(BallisticSettings settings)
         {
-            var (drop, drift, time) = BallisticsSolver.Solve(settings);
-            verticalDisplacement = drop;
-            horizontalDisplacement = drift;
+            double y = AdvancedBallisticsCalculator.CalculateImpact(settings);
+            verticalDisplacement = y;
         }
 
     }
