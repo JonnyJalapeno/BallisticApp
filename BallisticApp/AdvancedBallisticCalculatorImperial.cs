@@ -31,7 +31,7 @@ namespace BallisticApp
                 bulletMass,
                 table
             );
-            return (impactY*30.48, impactX*30.48);
+            return (impactY*30.48/100, impactX*30.48/100);
         }
 
         public static double FindZeroingAngle(BallisticSettings settings, double airSpeed, List<DragTablePoint> table,
