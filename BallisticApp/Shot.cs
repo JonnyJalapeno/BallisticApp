@@ -16,7 +16,7 @@ namespace BallisticApp
         }*/
         public Shot(BallisticSettings settings)
         {
-            (double y, double x) = AdvancedBallisticsCalculator.CalculateImpact(settings);
+            (double y, double x) = AdvancedBallisticsCalculatorImperial.CalculateImpact(settings);
             verticalDisplacement = y;
             horizontalDisplacement = x;
         }
