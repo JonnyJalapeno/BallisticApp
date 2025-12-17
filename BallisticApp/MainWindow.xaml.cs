@@ -5,7 +5,6 @@ namespace BallisticApp
     public partial class MainWindow : Window
     {
         private AppSettings settings;
-        private BallisticCalculator calculator;
         private Shot shot;
         private HUDManager hud;
         private TargetCanvasManager targetManager;
@@ -28,14 +27,13 @@ namespace BallisticApp
                 return;
             }
 
-            calculator = new BallisticCalculator(settings.Ballistics);
 
             shot = new Shot(settings.Ballistics);
 
             hud = new HUDManager(HudStackPanel, settings.Ballistics);
             hud.Render();
 
-            targetManager = new TargetCanvasManager(TargetCanvas, settings, shot, calculator);
+            targetManager = new TargetCanvasManager(TargetCanvas, settings, shot);
             //targetManager.DrawResult(settings.View.TargetType, shot);
             //targetManager.AddShot(calculator.ComputeVerticalDrop(), settings.Ballistics.TargetRadius);
             //targetManager.AddLine(settings.Ballistics.TargetRadius);

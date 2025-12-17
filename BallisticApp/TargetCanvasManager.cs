@@ -11,26 +11,24 @@ namespace BallisticApp
         private readonly int totalRings = 10;
         private AppSettings settings;
         private Shot shot;
-        private BallisticCalculator calculator;
 
         private double targetCenterX;
         private double targetCenterY;
         private double padding = 20;
 
-        public TargetCanvasManager(Canvas canvas, AppSettings settings, Shot shot, BallisticCalculator calculator)
+        public TargetCanvasManager(Canvas canvas, AppSettings settings, Shot shot)
         {
             this.canvas = canvas;
             this.settings = settings;
             this.shot = shot;
-            this.calculator = calculator;
 
             targetCenterX = canvas.ActualWidth / 2;
             targetCenterY = canvas.ActualHeight / 2;
 
-            DrawResult(settings.View.TargetType, this.shot, this.calculator);
+            DrawResult(settings.View.TargetType, this.shot);
         }
 
-        public void DrawResult(ViewSettings.TargetKind targetType, Shot shot, BallisticCalculator calculator)
+        public void DrawResult(ViewSettings.TargetKind targetType, Shot shot)
         {
             switch (targetType)
             {
@@ -38,7 +36,7 @@ namespace BallisticApp
                     DrawCircularResult(shot);
                     break;
                 case ViewSettings.TargetKind.Axes:
-                    DrawAxesResult(shot, calculator);
+                    DrawAxesResult(shot);
                     break;
             }
         }
@@ -55,12 +53,12 @@ namespace BallisticApp
             AdjustCanvasAndCenter(ref shotX, ref shotY);
 
             DrawCircle();
-            AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
+            //AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
 
             AddShot(targetCenterX + shotX, targetCenterY + shotY);
         }
 
-        private void DrawAxesResult(Shot shot, BallisticCalculator calculator)
+        private void DrawAxesResult(Shot shot)
         {
             canvas.Children.Clear();
 
@@ -91,7 +89,7 @@ namespace BallisticApp
             canvas.Children.Add(verticalLine);
             canvas.Children.Add(horizontalLine);
 
-            AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
+            //AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
 
             AddShot(targetCenterX + shotX, targetCenterY + shotY);
         }
@@ -160,7 +158,7 @@ namespace BallisticApp
             AddNumber("10", targetCenterX, targetCenterY);
         }
 
-        private void AddMOATicks(double maxDistancePixels)
+        /*private void AddMOATicks(double maxDistancePixels)
         {
             double tickIntervalMeters = calculator.ComputeMOADistance();
             for (double i = 0; i <= PixelsToMeters(maxDistancePixels, settings.Ballistics.TargetRadius); i += tickIntervalMeters)
@@ -177,7 +175,7 @@ namespace BallisticApp
                 };
                 canvas.Children.Add(tick);
             }
-        }
+        }*/
 
         private void AddShot(double x, double y)
         {

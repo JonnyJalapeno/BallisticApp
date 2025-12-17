@@ -13,8 +13,8 @@
             DefaultTextBehavior.SetDefaultText(w.SightHeightTextBox, "5");
             DefaultTextBehavior.SetDefaultText(w.ZeroDistanceTextBox, "100");
             // Conditions+Environment tab
-            DefaultTextBehavior.SetDefaultText(w.WindSpeedTextBox, "0");
-            DefaultTextBehavior.SetDefaultText(w.WindDirectionTextBox, "0");
+            DefaultTextBehavior.SetDefaultText(w.WindSpeedTextBox, "5");
+            DefaultTextBehavior.SetDefaultText(w.WindDirectionTextBox, "90");
             DefaultTextBehavior.SetDefaultText(w.AltitudeTextBox, "200");
             DefaultTextBehavior.SetDefaultText(w.PressureTextBox, "1013.2");
             DefaultTextBehavior.SetDefaultText(w.TemperatureTextBox, "15");
