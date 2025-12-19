@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,6 +20,45 @@ namespace BallisticApp
             InitializeComponent();
             DefaultFieldInitializer.Apply(this);
             DrawPreviews();
+
+            this.PreviewMouseDown += (s, e) =>
+            {
+                if (!(e.OriginalSource is TextBox))
+                    FocusSink.Focus(); // moves focus away from any TextBox
+            };
+        }
+
+        public SettingsWindow(AppSettings settings)
+        {
+            InitializeComponent();
+            //SettingsFieldUpdater.Apply(this, settings);
+            DefaultFieldInitializer.Apply(this, settings);
+            DrawPreviews();
+
+            this.PreviewMouseDown += (s, e) =>
+            {
+                if (!(e.OriginalSource is TextBox))
+                    FocusSink.Focus(); // moves focus away from any TextBox
+            };
+        }
+
+        public static void LoadPreviousValues(SettingsWindow window,AppSettings settings) 
+        {
+            // Use CultureInfo.InvariantCulture to ensure consistent formatting
+            var culture = CultureInfo.InvariantCulture;
+            foreach (PropertyInfo prop in settings.Ballistics.GetType().GetProperties())
+            {     
+                if (window.FindName(prop.Name + "TextBox") is TextBox tb)
+                {
+                    object value = prop.GetValue(settings.Ballistics);
+                    if (value != null)
+                    {
+                        //tb.Text = Convert.ToString(value, culture);
+                        //DefaultTextBehavior.SetDefaultText(tb, Convert.ToString(value,culture));
+                    }
+                }
+            }
+
         }
 
         private static double Parse(TextBox tb)
@@ -126,7 +166,36 @@ namespace BallisticApp
 
         private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            void Reset(TextBox tb)
+            {
+                string defaultValue = DefaultTextBehavior.GetDefaultText(tb);
+                tb.Text = defaultValue;
+                tb.Background = new SolidColorBrush(Color.FromRgb(235, 235, 235));
+                DefaultTextBehavior.SetCurrentText(tb, defaultValue);
+            }
+
+            foreach (var tb in FindVisualChildren<TextBox>(this))
+            {
+                if (!string.IsNullOrEmpty(DefaultTextBehavior.GetDefaultText(tb)))
+                    Reset(tb);
+            }
+        }
+
+        // Helper method to find all children of a certain type
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child is T t)
+                        yield return t;
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                        yield return childOfChild;
+                }
+            }
         }
     }
 }

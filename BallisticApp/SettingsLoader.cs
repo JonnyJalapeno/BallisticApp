@@ -24,7 +24,7 @@ namespace BallisticApp
 
         public static AppSettings UpdateSettings(Window owner, AppSettings settings) 
         {
-            var sw = new SettingsWindow()
+            var sw = new SettingsWindow(settings)
             {
                 Owner = owner,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
@@ -36,6 +36,7 @@ namespace BallisticApp
             settings.View = sw.View;
 
             return settings;
-        }   
+        } 
+        
     }
 }

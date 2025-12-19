@@ -13,7 +13,7 @@ namespace BallisticApp
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
-            ReturnButton.Click += ReturnButton_Click;
+            ReturnButton.Click += ReturnButton_Click;     
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
