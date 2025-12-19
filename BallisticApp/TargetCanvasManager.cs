@@ -50,9 +50,9 @@ namespace BallisticApp
             AdjustCanvasAndCenter(ref shotX, ref shotY);
 
             DrawCircle();
-            //AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
 
             AddShot(targetCenterX + shotX, targetCenterY + shotY);
+            AddMOATicks(shotX, shotY, shot);
         }
 
         private void DrawAxesResult(Shot shot)
@@ -86,9 +86,8 @@ namespace BallisticApp
             canvas.Children.Add(verticalLine);
             canvas.Children.Add(horizontalLine);
 
-            //AddMOATicks(Math.Max(Math.Abs(shotY), canvas.Height / 2));
-
             AddShot(targetCenterX + shotX, targetCenterY + shotY);
+            AddMOATicks(shotX, shotY, shot);
         }
 
         private void AdjustCanvasAndCenter(ref double shotX, ref double shotY)
@@ -155,24 +154,48 @@ namespace BallisticApp
             AddNumber("10", targetCenterX, targetCenterY);
         }
 
-        /*private void AddMOATicks(double maxDistancePixels)
+        private void AddMOATicks(double shotX, double shotY, Shot shot)
         {
-            double tickIntervalMeters = calculator.ComputeMOADistance();
-            for (double i = 0; i <= PixelsToMeters(maxDistancePixels, settings.Ballistics.TargetRadius); i += tickIntervalMeters)
+            double tickIntervalPixels = MetersToPixels(shot.moa, settings.Ballistics.TargetRadius);
+            double maxY = Math.Ceiling(shotY / tickIntervalPixels)*tickIntervalPixels;
+            if ((maxY + targetCenterY) > canvas.Height) {
+                canvas.Height = maxY + targetCenterY + padding;
+            }
+            double maxX = Math.Ceiling(shotX / tickIntervalPixels) * tickIntervalPixels;
+            if ((maxX + targetCenterX) > canvas.Width)
             {
-                double yPos = targetCenterY + MetersToPixels(-i, settings.Ballistics.TargetRadius); // invert
+                canvas.Width = maxX + targetCenterX + padding;
+            }
+            //vertical
+            for (double i = tickIntervalPixels; i <= maxY; i += tickIntervalPixels)
+            {
                 var tick = new Line
                 {
-                    X1 = targetCenterX - 20,
-                    Y1 = yPos,
-                    X2 = targetCenterX + 20,
-                    Y2 = yPos,
+                    X1 = targetCenterX + shotX - 20,
+                    Y1 = targetCenterY + i,
+                    X2 = targetCenterX + shotX + 20,
+                    Y2 = targetCenterY + i,
                     Stroke = Brushes.Orange,
-                    StrokeThickness = 1
+                    StrokeThickness = 2
                 };
                 canvas.Children.Add(tick);
             }
-        }*/
+
+            //horizontal
+            for (double i = tickIntervalPixels; i <= maxX; i += tickIntervalPixels)
+            {
+                var tick = new Line
+                {
+                    X1 = targetCenterX + i,
+                    Y1 = targetCenterY + shotY - 20,
+                    X2 = targetCenterX + i,
+                    Y2 = targetCenterY + shotY + 20,
+                    Stroke = Brushes.Orange,
+                    StrokeThickness = 2
+                };
+                canvas.Children.Add(tick);
+            }
+        }
 
         private void AddShot(double x, double y)
         {
@@ -185,6 +208,8 @@ namespace BallisticApp
             Canvas.SetLeft(hit, x - hit.Width / 2);
             Canvas.SetTop(hit, y - hit.Height / 2);
             canvas.Children.Add(hit);
+            ShotInfoPanel shotInfoPanel = new ShotInfoPanel();
+            shotInfoPanel.AddShotInfoPanel(canvas,shot, x,y);
         }
 
         private void AddNumber(string text, double x, double y, double fontSize = 14)

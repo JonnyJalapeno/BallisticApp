@@ -22,7 +22,6 @@ namespace BallisticApp
 
         }
 
-
         public void Render()
         {
             container.Children.Clear();
@@ -41,5 +40,4 @@ namespace BallisticApp
             }
         }
     }
-
 }
