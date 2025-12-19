@@ -1,1 +1,1 @@
-A C# ballistic calculator using JBM equations, euler method with a simple visual layer. 
+A C#/WPF ballistic calculator using JBM equations and euler method with a simple visual layer. 
