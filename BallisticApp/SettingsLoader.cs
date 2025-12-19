@@ -21,5 +21,21 @@ namespace BallisticApp
                 View = sw.View
             };
         }
+
+        public static AppSettings UpdateSettings(Window owner, AppSettings settings) 
+        {
+            var sw = new SettingsWindow()
+            {
+                Owner = owner,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            if (sw.ShowDialog() != true)
+                return null;
+
+            settings.Ballistics = sw.Ballistics;
+            settings.View = sw.View;
+
+            return settings;
+        }   
     }
 }

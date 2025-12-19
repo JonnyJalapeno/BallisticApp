@@ -82,7 +82,7 @@ namespace BallisticApp
             {
                 double dt = 0.0001;
                 double x = 0;
-                double y = 0;
+                double y = -settings.SightHeight/100;
                 double z = 0;
                 double vx = settings.BulletVelocity * Math.Cos(angle);
                 double vy = settings.BulletVelocity * Math.Sin(angle);

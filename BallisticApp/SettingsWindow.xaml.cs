@@ -119,9 +119,14 @@ namespace BallisticApp
             }
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

@@ -7,15 +7,20 @@ namespace BallisticApp
 {
     internal class HUDManager
     {
-        private readonly Panel container;
-        private readonly BallisticSettings settings;
+        private  StackPanel container;
+        private  BallisticSettings settings;
 
-        public HUDManager(Panel container, BallisticSettings settings)
+        public HUDManager(StackPanel container, BallisticSettings settings)
         {
             this.container = container;
             this.settings = settings;
         }
 
+        public void Update(AppSettings settings)       
+        {
+            this.settings = settings.Ballistics;
+
+        }
 
 
         public void Render()

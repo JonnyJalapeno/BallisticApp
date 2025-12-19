@@ -7,30 +7,47 @@
 
     <Grid>
 
-        <!-- TARGET LAYER -->
-        <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Auto">
-            <Canvas x:Name="TargetCanvas"
-                Width="600"
-                Height="600"
-                />
+        <!-- TARGET -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Canvas x:Name="TargetCanvas" Width="600" Height="600"/>
         </ScrollViewer>
 
         <!-- HUD OVERLAY -->
-        <Border Background="White"
-                Padding="10"
-                CornerRadius="4"
+        <StackPanel x:Name="HudOverlay"
+                Orientation="Vertical"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="10"
                 Panel.ZIndex="10"
-                Opacity="0.9">
+                Visibility="Collapsed">
 
-            <StackPanel x:Name="HudStackPanel"
-            Orientation="Vertical"
-            Margin="10"/>
+            <Border x:Name="BorderContainer"
+                Background="White"
+                Padding="10"
+                CornerRadius="4"
+                Opacity="0.8"
+                Margin="0,0,0,10">
+                <StackPanel x:Name="HudStackPanel"/>
+            </Border>
 
-        </Border>
+            <Border CornerRadius="6"
+            HorizontalAlignment="Left"
+            Padding="0"
+            Effect="{StaticResource ButtonShadow}"
+            >
+                <Button x:Name="ReturnButton"
+                    Width="80"
+                    Height="40"
+                    Content="Return"
+                    
+                    BorderThickness="0"
+                    Padding="10,6">
+                    <Button.Clip>
+                        <RectangleGeometry Rect="0,0,80,40" RadiusX="6" RadiusY="6"/>
+                    </Button.Clip>
+                </Button>
+            </Border>
 
+        </StackPanel>
     </Grid>
 </Window>

@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:BallisticApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <DropShadowEffect x:Key="ButtonShadow"
+                      Color="Black"
+                      BlurRadius="5"
+                      ShadowDepth="2"
+                      Opacity="0.3"/>
+
     </Application.Resources>
 </Application>

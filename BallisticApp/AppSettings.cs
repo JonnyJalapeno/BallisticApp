@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BallisticApp
 {
-    internal class AppSettings
+    public class AppSettings
     {
         public BallisticSettings Ballistics { get; set; }
         public ViewSettings View { get; set; }

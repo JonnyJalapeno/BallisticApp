@@ -20,10 +20,7 @@ namespace BallisticApp
         {
             this.canvas = canvas;
             this.settings = settings;
-            this.shot = shot;
-
-            targetCenterX = canvas.ActualWidth / 2;
-            targetCenterY = canvas.ActualHeight / 2;
+            this.shot = shot; 
 
             DrawResult(settings.View.TargetType, this.shot);
         }
@@ -43,7 +40,7 @@ namespace BallisticApp
 
         private void DrawCircularResult(Shot shot)
         {
-            canvas.Children.Clear();
+            ResetCanvas();
 
             // Convert displacement to pixels (invert vertical!)
             double shotX = MetersToPixels(shot.horizontalDisplacement, settings.Ballistics.TargetRadius);
@@ -60,7 +57,7 @@ namespace BallisticApp
 
         private void DrawAxesResult(Shot shot)
         {
-            canvas.Children.Clear();
+            ResetCanvas();
 
             double shotX = MetersToPixels(shot.horizontalDisplacement, settings.Ballistics.TargetRadius);
             double shotY = MetersToPixels(-shot.verticalDisplacement, settings.Ballistics.TargetRadius); // <-- invert
@@ -210,5 +207,16 @@ namespace BallisticApp
 
         public double PixelsToMeters(double pixels, double targetRadiusCm) =>
             pixels * ((targetRadiusCm * 2 / 100) / canvas.ActualHeight);
+
+        private void ResetCanvas()
+        {
+            canvas.Children.Clear();
+            canvas.Width = 600;
+            canvas.Height = 600;
+            canvas.UpdateLayout();
+
+            targetCenterX = canvas.ActualWidth / 2;
+            targetCenterY = canvas.ActualHeight / 2;
+        }
     }
 }
